@@ -37,7 +37,7 @@ prepare() {
 build() {
   cd "${pkgname}-${pkgver}"
   unset CC CXX LD
-  export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers"
+  export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized"
   export CPPFLAGS=""
   export LDFLAGS=""
   export TARGET_LDFLAGS="-fuse-ld=bfd"
