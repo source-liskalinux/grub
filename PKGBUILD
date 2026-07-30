@@ -25,6 +25,10 @@ prepare() {
 
 build() {
   cd "${pkgname}-${pkgver}"
+  unset CC CXX LD
+  export CFLAGS="-O2 -pipe"
+  export CPPFLAGS=""
+  export LDFLAGS=""
   for _target in "${_targets[@]}"
   do
     echo "===> Building target platform: ${_target}"
@@ -35,30 +39,16 @@ build() {
       i386-pc)
         _platform=pc
         _arch=i386
-        export CC="gcc -m32"
-        export CXX="g++ -m32"
-        export LD="ld -m elf_i386"
-        export LDFLAGS="-m32"
         ;;
       i386-efi)
         _platform=efi
         _arch=i386
-        export CC="gcc -m32"
-        export CXX="g++ -m32"
-        export LD="ld -m elf_i386"
-        export LDFLAGS="-m32"
         ;;
       x86_64-efi)
         _platform=efi
         _arch=x86_64
-        unset CC
-        unset CXX
-        unset LD
-        export LDFLAGS=""
         ;;
     esac
-    export CFLAGS="-O2 -pipe"
-    export CPPFLAGS=""
     ../configure \
       --prefix=/usr \
       --sysconfdir=/etc \
