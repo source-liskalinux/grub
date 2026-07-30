@@ -30,30 +30,35 @@ build() {
     echo "===> Building target platform: ${_target}"
     mkdir -p "build-${_target}"
     cd "build-${_target}"
-    local _platform _arch _target_cflags _target_ldflags
+    local _platform _arch
     case "${_target}" in
       i386-pc)
         _platform=pc
         _arch=i386
-        _target_cflags="-m32 -O2 -pipe"
-        _target_ldflags="-m32"
+        export CC="gcc -m32"
+        export CXX="g++ -m32"
+        export LD="ld -m elf_i386"
+        export LDFLAGS="-m32"
         ;;
       i386-efi)
         _platform=efi
         _arch=i386
-        _target_cflags="-m32 -O2 -pipe"
-        _target_ldflags="-m32"
+        export CC="gcc -m32"
+        export CXX="g++ -m32"
+        export LD="ld -m elf_i386"
+        export LDFLAGS="-m32"
         ;;
       x86_64-efi)
         _platform=efi
         _arch=x86_64
-        _target_cflags="-O2 -pipe"
-        _target_ldflags=""
+        unset CC
+        unset CXX
+        unset LD
+        export LDFLAGS=""
         ;;
     esac
-    export CFLAGS="${_target_cflags}"
+    export CFLAGS="-O2 -pipe"
     export CPPFLAGS=""
-    export LDFLAGS="${_target_ldflags}"
     ../configure \
       --prefix=/usr \
       --sysconfdir=/etc \
