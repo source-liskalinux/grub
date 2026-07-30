@@ -83,6 +83,8 @@ package() {
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
+  sed -i 's/"GNU\/Linux"/"Linux"/g' util/grub.d/10_linux.in
+  sed -i 's/\$os, with Linux/\$os/g' "${pkgdir}/etc/grub.d/10_linux"
   echo "===> Stripping userland binaries in /usr/bin..."
   find "${pkgdir}/usr/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
   rm -rf "${pkgdir}/usr/share/info"
