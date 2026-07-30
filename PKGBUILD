@@ -25,32 +25,35 @@ prepare() {
 
 build() {
   cd "${pkgname}-${pkgver}"
-  unset CFLAGS
-  unset CPPFLAGS
-  unset CXXFLAGS
-  unset LDFLAGS
-  export CFLAGS="-O2 -pipe"
-  export CPPFLAGS=""
-  export LDFLAGS=""
-  for _target in "${_targets[@]}"; do
+  for _target in "${_targets[@]}"
+  do
     echo "===> Building target platform: ${_target}"
     mkdir -p "build-${_target}"
     cd "build-${_target}"
-    local _platform _arch
+    local _platform _arch _target_cflags _target_ldflags
     case "${_target}" in
       i386-pc)
         _platform=pc
         _arch=i386
+        _target_cflags="-m32 -O2 -pipe"
+        _target_ldflags="-m32"
         ;;
       i386-efi)
         _platform=efi
         _arch=i386
+        _target_cflags="-m32 -O2 -pipe"
+        _target_ldflags="-m32"
         ;;
       x86_64-efi)
         _platform=efi
         _arch=x86_64
+        _target_cflags="-O2 -pipe"
+        _target_ldflags=""
         ;;
     esac
+    export CFLAGS="${_target_cflags}"
+    export CPPFLAGS=""
+    export LDFLAGS="${_target_ldflags}"
     ../configure \
       --prefix=/usr \
       --sysconfdir=/etc \
@@ -71,7 +74,8 @@ build() {
 
 package() {
   cd "${pkgname}-${pkgver}"
-  for _target in "${_targets[@]}"; do
+  for _target in "${_targets[@]}"
+  do
     echo "===> Installing target platform: ${_target}"
     cd "build-${_target}"
     make DESTDIR="${pkgdir}" install
@@ -79,7 +83,7 @@ package() {
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Stripping userland binaries in /usr/bin..."
-  strip --strip-unneeded "${pkgdir}"/usr/bin/* 2>/dev/null || true
+  find "${pkgdir}/usr/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
   rm -rf "${pkgdir}/usr/share/info"
   find "${pkgdir}" -type f -name "*.log" -exec rm -f {} +
 }
