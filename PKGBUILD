@@ -24,8 +24,8 @@ _targets=(i386-pc i386-efi x86_64-efi)
 prepare() {
   cd "${pkgname}-${pkgver}"
   sed 's|GNU/Linux|Linux|' -i "util/grub.d/10_linux.in"
-  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." \${version})"|message="$(gettext_printf "Loading %s ..." \${os})"|g' util/grub.d/10_linux.in
-  sed -i 's|recovery) title="$(gettext_printf "%s, with Linux %s (recovery mode)" "\${os}" "\${version}")" ;; \*) title="$(gettext_printf "%s, with Linux %s" "\${os}" "\${version}")" ;;|recovery) title="$(gettext_printf "%s (recovery mode)" "\${os}")" ;; \*) title="$(gettext_printf "%s" "\${os}")" ;;|g' util/grub.d/10_linux.in
+  sed 's|message="$(gettext_printf "Loading Linux %s ..." \${version})"|message="$(gettext_printf "Loading %s ..." \${os})"|g' -i "util/grub.d/10_linux.in"
+  sed 's|recovery) title="$(gettext_printf "%s, with Linux %s (recovery mode)" "\${os}" "\${version}")" ;; \*) title="$(gettext_printf "%s, with Linux %s" "\${os}" "\${version}")" ;;|recovery) title="$(gettext_printf "%s (recovery mode)" "\${os}")" ;; \*) title="$(gettext_printf "%s" "\${os}")" ;;|g' -i "util/grub.d/10_linux.in"
   if [[ -f bootstrap ]]; then
     ./bootstrap \
         --gnulib-srcdir="${srcdir}/gnulib" \
