@@ -1,3 +1,8 @@
+# PKGBUILD For Liska Linux GRUB (Grand Unified Bootloader)
+
+# Contributor: Janorovic Volkov <janorovicvolkov@gmail.com>
+# Maintainer: Janorovic Volkov <janorovicvolkov@gmail.com>
+
 pkgname=grub
 pkgver=2.14
 pkgrel=1
@@ -29,6 +34,7 @@ build() {
   export CFLAGS="-O2 -pipe"
   export CPPFLAGS=""
   export LDFLAGS=""
+  export TARGET_LDFLAGS="-fuse-ld=bfd"
   for _target in "${_targets[@]}"
   do
     echo "===> Building target platform: ${_target}"
