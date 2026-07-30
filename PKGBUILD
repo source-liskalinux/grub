@@ -23,8 +23,13 @@ _targets=(i386-pc i386-efi x86_64-efi)
 
 prepare() {
   cd "${pkgname}-${pkgver}"
+  sed 's|GNU/Linux|Linux|' -i "util/grub.d/10_linux.in"
+  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." \${version})"|message="$(gettext_printf "Loading %s ..." \${os})"|g' util/grub.d/10_linux.in
+  sed -i 's|recovery) title="$(gettext_printf "%s, with Linux %s (recovery mode)" "\${os}" "\${version}")" ;; \*) title="$(gettext_printf "%s, with Linux %s" "\${os}" "\${version}")" ;;|recovery) title="$(gettext_printf "%s (recovery mode)" "\${os}")" ;; \*) title="$(gettext_printf "%s" "\${os}")" ;;|g' util/grub.d/10_linux.in
   if [[ -f bootstrap ]]; then
-    ./bootstrap
+    ./bootstrap \
+        --gnulib-srcdir="${srcdir}/gnulib" \
+        --skip-po
   fi
 }
 
@@ -56,18 +61,20 @@ build() {
         ;;
     esac
     ../configure \
-      --prefix=/usr \
-      --sysconfdir=/etc \
-      --sbindir=/usr/bin \
-      --mandir=/usr/share/man \
-      --infodir=/usr/share/info \
-      --datarootdir=/usr/share \
-      --disable-werror \
-      --enable-grub-mkfont \
-      --enable-grub-mount \
-      --enable-device-mapper \
-      --with-platform="${_platform}" \
-      --target="${_arch}"
+        --prefix="/usr" \
+        --bindir="/usr/bin" \
+        --sbindir="/usr/bin" \
+        --mandir="/usr/share/man" \
+        --infodir="/usr/share/info" \
+        --datarootdir="/usr/share" \
+        --sysconfdir="/etc" \
+        --program-prefix="" \
+        --with-bootdir="/boot" \
+        --with-grubdir="grub" \
+        --enable-boot-time \
+        --enable-cache-stats \
+        --with-platform="${_platform}" \
+        --target="${_arch}"
     make
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
