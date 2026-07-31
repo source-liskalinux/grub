@@ -45,8 +45,8 @@ build() {
         _arch=x86_64
         ;;
     esac
-    export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-    export TARGET_CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export CFLAGS="-O2 -pipe -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export TARGET_CFLAGS="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export CPPFLAGS=""
     export LDFLAGS=""
     export TARGET_LDFLAGS="-fuse-ld=bfd"
