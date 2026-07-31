@@ -62,7 +62,7 @@ build() {
     export CPPFLAGS=""
     export LDFLAGS=""
     export TARGET_LDFLAGS="-fuse-ld=bfd"
-    ../configure \
+    ./configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
         --sbindir="/usr/bin" \
