@@ -11,7 +11,7 @@ arch=('x86_64')
 url="https://www.gnu.org/software/grub/"
 license=('GPL-3.0-or-later')
 depends=('sh' 'xz' 'gettext' 'device-mapper')
-makedepends=('git' 'python' 'flex' 'bison' 'autogen' 'texinfo' 'help2man' 'freetype2' 'fuse3' 'gcc-multilib' 'automake')
+makedepends=('git' 'python' 'flex' 'bison' 'autogen' 'texinfo' 'help2man' 'freetype2' 'fuse3' 'gcc-multilib')
 optdepends=('freetype2' 'fuse3' 'dosfstools' 'efibootmgr' 'mtools' 'os-prober')
 provides=('grub')
 conflicts=('grub')
@@ -21,24 +21,12 @@ source=("https://ftp.gnu.org/gnu/grub/grub-${pkgver}.tar.xz" "grub.default")
 sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
 
-prepare() {
-  cd "${pkgname}-${pkgver}"
-  sed 's|GNU/Linux|Linux|' -i "util/grub.d/10_linux.in"
-  sed 's|message="$(gettext_printf "Loading Linux %s ..." \${version})"|message="$(gettext_printf "Loading %s ..." \${os})"|g' -i "util/grub.d/10_linux.in"
-  sed 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "\${os}" "\${version}")"|title="$(gettext_printf "%s (recovery mode)" "\${os}")"|g' -i "util/grub.d/10_linux.in"
-  sed 's|title="$(gettext_printf "%s, with Linux %s" "\${os}" "\${version}")"|title="$(gettext_printf "%s" "\${os}")"|g' -i "util/grub.d/10_linux.in"
-  if [[ -f bootstrap ]]; then
-    ./bootstrap \
-        --gnulib-srcdir="${srcdir}/gnulib" \
-        --skip-po
-  fi
-}
-
 build() {
   unset CC CXX LD
   for _target in "${_targets[@]}"
   do
-    echo "===> Preparing clean source tree for target platform: ${_target}"
+    echo "===> Preparing clean source tree for targeted platform: ${_target}"
+    cd "${srcdir}"
     rm -rf "${pkgname}-${pkgver}-${_target}"
     cp -r "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
     cd "${pkgname}-${pkgver}-${_target}"
@@ -79,23 +67,24 @@ build() {
         --with-platform="${_platform}" \
         --target="${_arch}"
     make
-    cd "${srcdir}"
   done
 }
 
 package() {
   for _target in "${_targets[@]}"
   do
-    echo "===> Installing target platform: ${_target}"
-    cd "${pkgname}-${pkgver}-${_target}"
+    echo "===> Installing targeted platform: ${_target}"
+    cd "${srcdir}/${pkgname}-${pkgver}-${_target}"
     make DESTDIR="${pkgdir}" install
-    cd "${srcdir}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
-  sed -i 's/"GNU\/Linux"/"Linux"/g' "${pkgdir}/etc/grub.d/10_linux"
-  sed -i 's/\$os, with Linux/\$os/g' "${pkgdir}/etc/grub.d/10_linux"
-  echo "===> Stripping userland binaries in /usr/bin..."
-  find "${pkgdir}/usr/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+  echo "===> Configuring /etc/grub.d/10_linux...."
+  sed -i 's|GNU/Linux|Linux|g' "${pkgdir}/etc/grub.d/10_linux"
+  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ..." ${os})"|g' "${pkgdir}/etc/grub.d/10_linux"
+  sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
+  sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
+  echo "===> Stripping userland binaries in /usr/bin...."
+  find "${pkgdir}/usr/bin" -type f -exec strip --strip-unneeded {} + 2>/devnull || true
   rm -rf "${pkgdir}/usr/share/info"
   find "${pkgdir}" -type f -name "*.log" -exec rm -f {} +
 }
