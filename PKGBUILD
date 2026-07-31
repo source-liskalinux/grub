@@ -48,7 +48,7 @@ build() {
         _arch=x86_64
         ;;
     esac
-    ./configure \
+    ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
         --sbindir="/usr/bin" \
