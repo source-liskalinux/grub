@@ -35,17 +35,13 @@ prepare() {
 }
 
 build() {
-  cd "${pkgname}-${pkgver}"
   unset CC CXX LD
-  export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-  export CPPFLAGS=""
-  export LDFLAGS=""
-  export TARGET_LDFLAGS="-fuse-ld=bfd"
   for _target in "${_targets[@]}"
   do
-    echo "===> Building target platform: ${_target}"
-    mkdir -p "build-${_target}"
-    cd "build-${_target}"
+    echo "===> Preparing clean source tree for target platform: ${_target}"
+    rm -rf "${pkgname}-${pkgver}-${_target}"
+    cp -r "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
+    cd "${pkgname}-${pkgver}-${_target}"
     local _platform _arch
     case "${_target}" in
       i386-pc)
@@ -61,6 +57,11 @@ build() {
         _arch=x86_64
         ;;
     esac
+    export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export TARGET_CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export CPPFLAGS=""
+    export LDFLAGS=""
+    export TARGET_LDFLAGS="-fuse-ld=bfd"
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
@@ -74,21 +75,21 @@ build() {
         --with-grubdir="grub" \
         --enable-boot-time \
         --enable-cache-stats \
+        --disable-werror \
         --with-platform="${_platform}" \
         --target="${_arch}"
     make
-    cd "${srcdir}/${pkgname}-${pkgver}"
+    cd "${srcdir}"
   done
 }
 
 package() {
-  cd "${pkgname}-${pkgver}"
   for _target in "${_targets[@]}"
   do
     echo "===> Installing target platform: ${_target}"
-    cd "build-${_target}"
+    cd "${pkgname}-${pkgver}-${_target}"
     make DESTDIR="${pkgdir}" install
-    cd "${srcdir}/${pkgname}-${pkgver}"
+    cd "${srcdir}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   sed -i 's/"GNU\/Linux"/"Linux"/g' "${pkgdir}/etc/grub.d/10_linux"
