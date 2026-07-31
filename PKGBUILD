@@ -28,7 +28,7 @@ build() {
     echo "===> Preparing clean source tree for targeted platform: ${_target}"
     cd "${srcdir}"
     rm -rf "${pkgname}-${pkgver}-${_target}"
-    cp -r "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
+    cp -a "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
     cd "${pkgname}-${pkgver}-${_target}"
     local _platform _arch
     case "${_target}" in
