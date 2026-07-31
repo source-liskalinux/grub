@@ -27,27 +27,30 @@ build() {
   export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
   export CPPFLAGS=""
   export LDFLAGS=""
-  local _target_cflags="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
   for _target in "${_targets[@]}"
   do
     echo "===> Building target platform: ${_target}"
     mkdir -p "build-${_target}"
     cd "build-${_target}"
-    local _platform _arch
+    local _platform _arch _target_cflags
     case "${_target}" in
       i386-pc)
         _platform=pc
         _arch=i386
+        _target_cflags="-m32 -O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
       i386-efi)
         _platform=efi
         _arch=i386
+        _target_cflags="-m32 -O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
       x86_64-efi)
         _platform=efi
         _arch=x86_64
+        _target_cflags="-m64 -O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
     esac
+    export TARGET_CFLAGS="${_target_cflags}"
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
@@ -64,8 +67,7 @@ build() {
         --disable-werror \
         --disable-maintainer-mode \
         --with-platform="${_platform}" \
-        --target="${_arch}" \
-        TARGET_CFLAGS="${_target_cflags}"
+        --target="${_arch}"
     make
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
