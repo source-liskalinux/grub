@@ -22,14 +22,17 @@ sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
+  cd "${pkgname}-${pkgver}"
   unset CC CXX LD
+  export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+  export CPPFLAGS=""
+  export LDFLAGS=""
+  local _target_cflags="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
   for _target in "${_targets[@]}"
   do
-    echo "===> Preparing clean source tree for targeted platform: ${_target}"
-    cd "${srcdir}"
-    rm -rf "${pkgname}-${pkgver}-${_target}"
-    cp -a "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
-    cd "${pkgname}-${pkgver}-${_target}"
+    echo "===> Building target platform: ${_target}"
+    mkdir -p "build-${_target}"
+    cd "build-${_target}"
     local _platform _arch
     case "${_target}" in
       i386-pc)
@@ -45,10 +48,6 @@ build() {
         _arch=x86_64
         ;;
     esac
-    export CFLAGS="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-    export TARGET_CFLAGS="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-    export CPPFLAGS=""
-    export LDFLAGS=""
     ./configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
@@ -63,18 +62,23 @@ build() {
         --enable-boot-time \
         --enable-cache-stats \
         --disable-werror \
+        --disable-maintainer-mode \
         --with-platform="${_platform}" \
-        --target="${_arch}"
+        --target="${_arch}" \
+        TARGET_CFLAGS="${_target_cflags}"
     make
+    cd "${srcdir}/${pkgname}-${pkgver}"
   done
 }
 
 package() {
+  cd "${pkgname}-${pkgver}"
   for _target in "${_targets[@]}"
   do
-    echo "===> Installing targeted platform: ${_target}"
-    cd "${srcdir}/${pkgname}-${pkgver}-${_target}"
+    echo "===> Installing target platform: ${_target}"
+    cd "build-${_target}"
     make DESTDIR="${pkgdir}" install
+    cd "${srcdir}/${pkgname}-${pkgver}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Configuring /etc/grub.d/10_linux...."
