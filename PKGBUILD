@@ -23,7 +23,7 @@ _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
   cd "${pkgname}-${pkgver}"
-  cat << 'EOF' > "${srcdir}/discard_notes.ld"
+cat << 'EOF' > "${srcdir}/discard_notes.ld"
 SECTIONS {
   /DISCARD/ : {
     *(.note*)
@@ -31,6 +31,7 @@ SECTIONS {
     *(.eh_frame*)
   }
 }
+INSERT AFTER .text;
 EOF
   unset CC CXX LD CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS
   for _target in "${_targets[@]}"
