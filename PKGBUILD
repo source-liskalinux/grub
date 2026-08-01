@@ -23,7 +23,7 @@ _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
   cd "${pkgname}-${pkgver}"
-  unset CC CXX LD CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS
+  unset CC CXX LD CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS EXTRA_TARGET_CFLAGS
   for _target in "${_targets[@]}"
   do
     echo "===> Building target platform: ${_target}"
@@ -34,9 +34,6 @@ build() {
     export CFLAGS="-O2 -pipe"
     export CPPFLAGS=""
     export LDFLAGS=""
-    export TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fcf-protection=none -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-    export TARGET_CPPFLAGS=""
-    export TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code"
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
@@ -53,7 +50,10 @@ build() {
         --disable-werror \
         --enable-stack-protector=no \
         --with-platform="${_platform}" \
-        --target="${_arch}"
+        --target="${_arch}" \
+        TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fcf-protection=none -Wa,-mx86-used-note=no -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes" \
+        TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,-z,ibt=off -Wl,-z,shstk=off" \
+        EXTRA_TARGET_CFLAGS="-fcf-protection=none -Wa,-mx86-used-note=no"
     make
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
@@ -71,7 +71,7 @@ package() {
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Configuring /etc/grub.d/10_linux...."
   sed -i 's|GNU/Linux|Linux|g' "${pkgdir}/etc/grub.d/10_linux"
-  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ..." ${os})"|g' "${pkgdir}/etc/grub.d/10_linux"
+  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ...." ${os})"|g' "${pkgdir}/etc/grub.d/10_linux"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
   echo "===> Stripping userland binaries in /usr/bin...."
