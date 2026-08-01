@@ -22,35 +22,36 @@ sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
-  cd "${pkgname}-${pkgver}"
   unset CC CXX LD
-  export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-  export CPPFLAGS=""
-  export LDFLAGS=""
   for _target in "${_targets[@]}"
   do
-    echo "===> Building target platform: ${_target}"
-    mkdir -p "build-${_target}"
-    cd "build-${_target}"
-    local _platform _arch _target_cflags
+    echo "===> Preparing clean source tree for targeted platform: ${_target}"
+    cd "${srcdir}"
+    rm -rf "${pkgname}-${pkgver}-${_target}"
+    cp -a "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
+    cd "${pkgname}-${pkgver}-${_target}"
+
+    local _platform _arch
     case "${_target}" in
       i386-pc)
         _platform=pc
         _arch=i386
-        _target_cflags="-O2 -m32 -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
       i386-efi)
         _platform=efi
         _arch=i386
-        _target_cflags="-O2 -m32 -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
       x86_64-efi)
         _platform=efi
         _arch=x86_64
-        _target_cflags="-O2 -m64 -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
     esac
-    ../configure \
+    export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export TARGET_CFLAGS="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export CPPFLAGS=""
+    export LDFLAGS=""
+    export TARGET_LDFLAGS="-fuse-ld=bfd"
+    ./configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
         --sbindir="/usr/bin" \
@@ -64,26 +65,18 @@ build() {
         --enable-boot-time \
         --enable-cache-stats \
         --disable-werror \
-        --disable-maintainer-mode \
         --with-platform="${_platform}" \
-        --target="${_arch}" \
-        TARGET_CC="gcc" \
-        TARGET_CFLAGS="${_target_cflags}" \
-        TARGET_CPPFLAGS="" \
-        TARGET_LDFLAGS=""
+        --target="${_arch}"
     make
-    cd "${srcdir}/${pkgname}-${pkgver}"
   done
 }
 
 package() {
-  cd "${pkgname}-${pkgver}"
   for _target in "${_targets[@]}"
   do
-    echo "===> Installing target platform: ${_target}"
-    cd "build-${_target}"
+    echo "===> Installing targeted platform: ${_target}"
+    cd "${srcdir}/${pkgname}-${pkgver}-${_target}"
     make DESTDIR="${pkgdir}" install
-    cd "${srcdir}/${pkgname}-${pkgver}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Configuring /etc/grub.d/10_linux...."
