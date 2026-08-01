@@ -25,14 +25,10 @@ prepare() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   echo "--> [PREPARE] Fix DejaVuSans.ttf location so that grub-mkfont can create *.pf2 files for starfield theme...."
   sed 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' -i "configure.ac"
-  echo "--> [PREPARE] Run bootstrap...."
-  ./bootstrap \
-    --gnulib-srcdir="${srcdir}/gnulib" \
-    --skip-po
   echo "--> [PREPARE] Patching configure to force -Ttext for TARGET_IMG_LDFLAGS (kernel.img)...."
   sed -i 's|TARGET_IMG_LDFLAGS="\$TARGET_IMG_LDFLAGS -Wl,--image-base,0x9000"|TARGET_IMG_LDFLAGS="\$TARGET_IMG_LDFLAGS -Wl,-Ttext,0x9000"|g' configure
   sed -i 's|grub_cv_target_cc_ld_image_base=yes|grub_cv_target_cc_ld_image_base=no|g' configure
-  find . -name "Makefile.in" -exec sed -i 's/-R .note.gnu.build-id/-R .note.gnu.build-id -R .note.gnu.property/g' {} +
+  find . -name "Makefile.in" -exec sed -i 's|-R .note.gnu.build-id|-R .note.gnu.build-id -R .note.gnu.property|g' {} +
   local _10_linux="${srcdir}/${pkgname}-${pkgver}"
   echo "--> [PREPARE] Configuring /util/grub.d/10_linux.in...."
   sed -i 's|GNU/Linux|Linux|g' "${_10_linux}/util/grub.d/10_linux.in"
