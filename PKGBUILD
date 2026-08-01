@@ -31,15 +31,7 @@ build() {
     local _platform="${_target#*-}"
     mkdir -p "build-${_target}"
     cd "build-${_target}"
-    local _target_cflags=""
-    case "${_arch}" in
-      i386)
-        _target_cflags="-O2 -pipe -m32 -fno-stack-protector -fno-cf-protection -Wa,-mx86-used-note=no -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-        ;;
-      x86_64)
-        _target_cflags="-O2 -pipe -m64 -fno-stack-protector -fno-cf-protection -Wa,-mx86-used-note=no -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-        ;;
-    esac
+    local _target_cflags="-O2 -pipe -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export CFLAGS="-O2 -pipe"
     export CPPFLAGS=""
     export LDFLAGS=""
