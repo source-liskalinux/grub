@@ -21,6 +21,13 @@ source=("https://ftp.gnu.org/gnu/grub/grub-${pkgver}.tar.xz" "grub.default")
 sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
 
+prepare() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  echo "===> Patching configure script to force -Ttext over --image-base...."
+  sed -i 's/grub_cv_target_cc_ld_image_base=yes/grub_cv_target_cc_ld_image_base=no/g' configure
+  sed -i 's/--image-base/-Ttext/g' configure
+}
+
 build() {
   unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS CC CXX LD
   unset TARGET_CFLAGS TARGET_CCASFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS
@@ -33,9 +40,11 @@ build() {
     cp -a "${srcdir}/${pkgname}-${pkgver}" "${srcdir}/grub-${_target}"
     cd "${srcdir}/grub-${_target}"
     local _opts=()
+    local _ldflags="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,-z,ibt=off -Wl,-z,shstk=off"
     case "${_target}" in
       i386-pc)
         _opts+=(--enable-efiemu --with-platform="pc" --target="i386")
+        _ldflags="-Wl,-Ttext,0x9000 ${_ldflags}"
         ;;
       i386-efi)
         _opts+=(--disable-efiemu --with-platform="efi" --target="i386")
@@ -45,7 +54,7 @@ build() {
         ;;
     esac
     echo "===> Running ./configure for ${_target}...."
-    ./configure \
+    grub_cv_target_cc_ld_image_base=no ./configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
         --sbindir="/usr/bin" \
@@ -63,7 +72,7 @@ build() {
         "${_opts[@]}" \
         TARGET_CFLAGS="-O2 -pipe -fno-stack-protector ${_common_flags} -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes" \
         TARGET_CCASFLAGS="${_common_flags}" \
-        TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,-z,ibt=off -Wl,-z,shstk=off" \
+        TARGET_LDFLAGS="${_ldflags}" \
         EXTRA_TARGET_CFLAGS="${_common_flags}" \
         EXTRA_TARGET_CCASFLAGS="${_common_flags}" \
         EXTRA_TARGET_LDFLAGS="-Wl,-z,ibt=off -Wl,-z,shstk=off"
@@ -108,7 +117,7 @@ package() {
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Configuring /etc/grub.d/10_linux...."
-  sed -i 's|GNU/Linux|Linux|g' "${pkgdir}/etc/grub.d/10_linux"
+  sed -i 's|GNU/Linux|Liska Linux|g' "${pkgdir}/etc/grub.d/10_linux"
   sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ...." ${os})"|g' "${pkgdir}/etc/grub.d/10_linux"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
