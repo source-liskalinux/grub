@@ -27,8 +27,6 @@ prepare() {
   sed -i 's/TARGET_IMG_LDFLAGS="\$TARGET_IMG_LDFLAGS -Wl,--image-base,0x9000"/TARGET_IMG_LDFLAGS="\$TARGET_IMG_LDFLAGS -Wl,-Ttext,0x9000"/g' configure
   sed -i 's/grub_cv_target_cc_ld_image_base=yes/grub_cv_target_cc_ld_image_base=no/g' configure
   find . -name "Makefile.in" -exec sed -i 's/-R .note.gnu.build-id/-R .note.gnu.build-id -R .note.gnu.property/g' {} +
-  echo "--> [PREPARE] Patch to enable GRUB_COLOR_* variables in grub-mkconfig...."
-  patch -Np1 -i "${srcdir}/0001-00_header-add-GRUB_COLOR_-variables.patch"
   echo "--> [PREPARE] Fix DejaVuSans.ttf location so that grub-mkfont can create *.pf2 files for starfield theme...."
   sed 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' -i "configure.ac"
   local _10_linux="${srcdir}/${pkgname}-${pkgver}"
