@@ -34,7 +34,7 @@ build() {
     export CFLAGS="-O2 -pipe"
     export CPPFLAGS=""
     export LDFLAGS=""
-    export TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+    export TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fcf-protection=none -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export TARGET_CPPFLAGS=""
     export TARGET_LDFLAGS="-Wl,--build-id=none"
     ../configure \
