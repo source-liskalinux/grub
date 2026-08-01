@@ -36,7 +36,7 @@ build() {
     export LDFLAGS=""
     export TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fcf-protection=none -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export TARGET_CPPFLAGS=""
-    export TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,--orphan-handling=discard"
+    export TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code"
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
