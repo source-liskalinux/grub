@@ -6,13 +6,13 @@
 pkgname=grub
 pkgver=2.14
 pkgrel=1
-pkgdesc="GNU GRand Unified Bootloader (Liska Linux Edition)"
+pkgdesc="GNU GRand Unified Bootloader (Liska Linux Edition - BIOS, EFI32, EFI64)"
 arch=('x86_64')
 url="https://www.gnu.org/software/grub/"
 license=('GPL-3.0-or-later')
-depends=('sh' 'xz' 'gettext' 'device-mapper')
+depends=('bash' 'xz' 'gettext' 'device-mapper')
 makedepends=('git' 'python' 'flex' 'bison' 'autogen' 'texinfo' 'help2man' 'freetype2' 'fuse3' 'gcc-multilib')
-optdepends=('freetype2' 'fuse3' 'dosfstools' 'efibootmgr' 'mtools' 'os-prober')
+optdepends=('dosfstools' 'efibootmgr' 'freetype2' 'fuse3' 'mtools' 'os-prober')
 provides=('grub')
 conflicts=('grub')
 backup=('etc/default/grub')
@@ -22,19 +22,30 @@ sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
-  cd "${pkgname}-${pkgver}"
-  unset CC CXX LD CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS EXTRA_TARGET_CFLAGS
+  unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS CC CXX LD
+  unset TARGET_CFLAGS TARGET_CCASFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS
+  unset EXTRA_TARGET_CFLAGS EXTRA_TARGET_CCASFLAGS EXTRA_TARGET_LDFLAGS
+  local _common_flags="-fcf-protection=none -Wa,-mx86-used-note=no"
   for _target in "${_targets[@]}"
   do
-    echo "===> Building target platform: ${_target}"
-    local _arch="${_target%%-*}"
-    local _platform="${_target#*-}"
-    mkdir -p "build-${_target}"
-    cd "build-${_target}"
-    export CFLAGS="-O2 -pipe"
-    export CPPFLAGS=""
-    export LDFLAGS=""
-    ../configure \
+    echo "===> Preparing In-Tree Build Directory for: ${_target}"
+    rm -rf "${srcdir}/grub-${_target}"
+    cp -a "${srcdir}/${pkgname}-${pkgver}" "${srcdir}/grub-${_target}"
+    cd "${srcdir}/grub-${_target}"
+    local _opts=()
+    case "${_target}" in
+      i386-pc)
+        _opts+=(--enable-efiemu --with-platform="pc" --target="i386")
+        ;;
+      i386-efi)
+        _opts+=(--disable-efiemu --with-platform="efi" --target="i386")
+        ;;
+      x86_64-efi)
+        _opts+=(--with-platform="efi" --target="x86_64")
+        ;;
+    esac
+    echo "===> Running ./configure for ${_target}...."
+    ./configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
         --sbindir="/usr/bin" \
@@ -49,24 +60,51 @@ build() {
         --enable-cache-stats \
         --disable-werror \
         --enable-stack-protector=no \
-        --with-platform="${_platform}" \
-        --target="${_arch}" \
-        TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fcf-protection=none -Wa,-mx86-used-note=no -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes" \
+        "${_opts[@]}" \
+        TARGET_CFLAGS="-O2 -pipe -fno-stack-protector ${_common_flags} -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes" \
+        TARGET_CCASFLAGS="${_common_flags}" \
         TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,-z,ibt=off -Wl,-z,shstk=off" \
-        EXTRA_TARGET_CFLAGS="-fcf-protection=none -Wa,-mx86-used-note=no"
+        EXTRA_TARGET_CFLAGS="${_common_flags}" \
+        EXTRA_TARGET_CCASFLAGS="${_common_flags}" \
+        EXTRA_TARGET_LDFLAGS="-Wl,-z,ibt=off -Wl,-z,shstk=off"
+    echo "===> Compiling GRUB for ${_target}...."
     make
-    cd "${srcdir}/${pkgname}-${pkgver}"
   done
 }
 
+check() {
+  echo "===> Running Validation Tests with grub-mkimage"
+  echo "===> [TEST 1/3] Testing i386-pc Core Image Generation...."
+  "${srcdir}/grub-i386-pc/grub-mkimage" \
+    -d "${srcdir}/grub-i386-pc/grub-core" \
+    -O i386-pc \
+    -o /tmp/liska_test_bios.img \
+    -p /boot/grub \
+    biosdisk part_msdos ext2
+  echo "===> [TEST 2/3] Testing i386-efi Image Generation...."
+  "${srcdir}/grub-i386-efi/grub-mkimage" \
+    -d "${srcdir}/grub-i386-efi/grub-core" \
+    -O i386-efi \
+    -o /tmp/liska_test_efi32.efi \
+    -p /boot/grub \
+    part_gpt fat ext2
+  echo "===> [TEST 3/3] Testing x86_64-efi Image Generation...."
+  "${srcdir}/grub-x86_64-efi/grub-mkimage" \
+    -d "${srcdir}/grub-x86_64-efi/grub-core" \
+    -O x86_64-efi \
+    -o /tmp/liska_test_efi64.efi \
+    -p /boot/grub \
+    part_gpt fat ext2
+  rm -f /tmp/liska_test_bios.img /tmp/liska_test_efi32.efi /tmp/liska_test_efi64.efi
+  echo "===> [+] SUCCESS: All 3 Target Platforms Passed Validation!"
+}
+
 package() {
-  cd "${pkgname}-${pkgver}"
   for _target in "${_targets[@]}"
   do
     echo "===> Installing target platform: ${_target}"
-    cd "build-${_target}"
+    cd "${srcdir}/grub-${_target}"
     make DESTDIR="${pkgdir}" install
-    cd "${srcdir}/${pkgname}-${pkgver}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Configuring /etc/grub.d/10_linux...."
