@@ -20,18 +20,18 @@ options=('!strip' '!debug' '!buildflags')
 source=("https://ftp.gnu.org/gnu/grub/grub-${pkgver}.tar.xz" "grub.default")
 sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
+_10_linux=("${srcdir}/${pkgname}-${pkgver}")
 
 prepare() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   echo "===> Patching configure script to force -Ttext over --image-base...."
   sed -i 's/grub_cv_target_cc_ld_image_base=yes/grub_cv_target_cc_ld_image_base=no/g' configure
   sed -i 's/--image-base/-Ttext/g' configure
-  cd "${srcdir}/${pkgname}-${pkgver}"
   echo "===> Configuring /etc/grub.d/10_linux...."
-  sed -i 's|GNU/Linux|Linux|g' "etc/grub.d/10_linux"
-  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ...." ${os})"|g' "etc/grub.d/10_linux"
-  sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "etc/grub.d/10_linux"
-  sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "etc/grub.d/10_linux"
+  sed -i 's|GNU/Linux|Linux|g' "${_10_linux}/etc/grub.d/10_linux"
+  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ...." ${os})"|g' "${_10_linux}/etc/grub.d/10_linux"
+  sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${_10_linux}/etc/grub.d/10_linux"
+  sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${_10_linux}/etc/grub.d/10_linux"
 }
 
 build() {
