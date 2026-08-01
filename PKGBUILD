@@ -23,7 +23,7 @@ _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
   cd "${pkgname}-${pkgver}"
-  unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS CC CXX LD
+  unset CC CXX LD CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS
   for _target in "${_targets[@]}"
   do
     echo "===> Building target platform: ${_target}"
@@ -31,6 +31,21 @@ build() {
     local _platform="${_target#*-}"
     mkdir -p "build-${_target}"
     cd "build-${_target}"
+    local _target_cflags=""
+    case "${_arch}" in
+      i386)
+        _target_cflags="-O2 -pipe -m32 -fno-stack-protector -fno-cf-protection -Wa,-mx86-used-note=no -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+        ;;
+      x86_64)
+        _target_cflags="-O2 -pipe -m64 -fno-stack-protector -fno-cf-protection -Wa,-mx86-used-note=no -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+        ;;
+    esac
+    export CFLAGS="-O2 -pipe"
+    export CPPFLAGS=""
+    export LDFLAGS=""
+    export TARGET_CFLAGS="${_target_cflags}"
+    export TARGET_CPPFLAGS=""
+    export TARGET_LDFLAGS=""
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
@@ -47,8 +62,7 @@ build() {
         --disable-werror \
         --enable-stack-protector=no \
         --with-platform="${_platform}" \
-        --target="${_arch}" \
-        EXTRA_TARGET_CFLAGS="-fno-cf-protection"
+        --target="${_arch}"
     make
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
