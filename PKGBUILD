@@ -27,10 +27,10 @@ prepare() {
   sed -i 's/grub_cv_target_cc_ld_image_base=yes/grub_cv_target_cc_ld_image_base=no/g' configure
   sed -i 's/--image-base/-Ttext/g' configure
   echo "===> Configuring /etc/grub.d/10_linux...."
-  sed -i 's|GNU/Linux|Linux|g' "${pkgdir}/etc/grub.d/10_linux"
-  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ...." ${os})"|g' "${pkgdir}/etc/grub.d/10_linux"
-  sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
-  sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${pkgdir}/etc/grub.d/10_linux"
+  sed -i 's|GNU/Linux|Linux|g' "etc/grub.d/10_linux"
+  sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s ...." ${os})"|g' "etc/grub.d/10_linux"
+  sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "etc/grub.d/10_linux"
+  sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "etc/grub.d/10_linux"
 }
 
 build() {
