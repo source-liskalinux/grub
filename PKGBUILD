@@ -82,10 +82,10 @@ build() {
         "${_opts[@]}" \
         TARGET_CFLAGS="-O2 -pipe -fno-stack-protector ${_common_flags} -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes" \
         TARGET_CCASFLAGS="${_common_flags}" \
-        TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,-z,ibt=off -Wl,-z,shstk=off" \
+        TARGET_LDFLAGS="-Wl,--build-id=none -Wl,-z,noseparate-code -Wl,-z,gnu-property-note=none" \
         EXTRA_TARGET_CFLAGS="${_common_flags}" \
         EXTRA_TARGET_CCASFLAGS="${_common_flags}" \
-        EXTRA_TARGET_LDFLAGS="-Wl,-z,ibt=off -Wl,-z,shstk=off"
+        EXTRA_TARGET_LDFLAGS="-Wl,-z,gnu-property-note=none"
     echo "--> [BUILD] Compiling GRUB for ${_target}...."
     make
   done
