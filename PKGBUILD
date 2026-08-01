@@ -30,7 +30,6 @@ build() {
     rm -rf "${pkgname}-${pkgver}-${_target}"
     cp -a "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
     cd "${pkgname}-${pkgver}-${_target}"
-
     local _platform _arch
     case "${_target}" in
       i386-pc)
@@ -50,7 +49,7 @@ build() {
     export TARGET_CFLAGS="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export CPPFLAGS=""
     export LDFLAGS=""
-    export TARGET_LDFLAGS="-fuse-ld=bfd"
+    export TARGET_LDFLAGS=""
     ./configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
