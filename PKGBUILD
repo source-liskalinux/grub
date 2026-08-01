@@ -20,7 +20,7 @@ options=('!strip' '!debug' '!buildflags')
 source=("https://ftp.gnu.org/gnu/grub/grub-${pkgver}.tar.xz" "grub.default")
 sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
-_10_linux=("${srcdir}/${pkgname}-${pkgver}")
+_10_linux=('${srcdir}/${pkgname}-${pkgver}')
 
 prepare() {
   cd "${srcdir}/${pkgname}-${pkgver}"
