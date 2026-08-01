@@ -27,7 +27,7 @@ prepare() {
   sed -i 's/grub_cv_target_cc_ld_image_base=yes/grub_cv_target_cc_ld_image_base=no/g' configure
   local _10_linux="${srcdir}/${pkgname}-${pkgver}"
   echo "===> [LOG] Configuring /util/grub.d/10_linux.in...."
-  sed -i 's|GNU/Linux|Liska Linux|g' "${_10_linux}/util/grub.d/10_linux.in"
+  sed -i 's|GNU/Linux|Linux|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s...." ${os})"|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${_10_linux}/util/grub.d/10_linux.in"
