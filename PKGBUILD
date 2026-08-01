@@ -31,13 +31,12 @@ build() {
     local _platform="${_target#*-}"
     mkdir -p "build-${_target}"
     cd "build-${_target}"
-    local _target_cflags="-O2 -pipe -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export CFLAGS="-O2 -pipe"
     export CPPFLAGS=""
     export LDFLAGS=""
-    export TARGET_CFLAGS="${_target_cflags}"
+    export TARGET_CFLAGS="-O2 -pipe -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
     export TARGET_CPPFLAGS=""
-    export TARGET_LDFLAGS=""
+    export TARGET_LDFLAGS="-Wl,--build-id=none"
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
