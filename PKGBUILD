@@ -24,7 +24,7 @@ _targets=(i386-pc i386-efi x86_64-efi)
 prepare() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   echo "--> [PREPARE] Fix DejaVuSans.ttf location so that grub-mkfont can create *.pf2 files for starfield theme...."
-  sed 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' -i "configure.ac"
+  sed 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' -i "configure"
   echo "--> [PREPARE] Patching configure to force -Ttext for TARGET_IMG_LDFLAGS (kernel.img)...."
   sed -i 's|TARGET_IMG_LDFLAGS="\$TARGET_IMG_LDFLAGS -Wl,--image-base,0x9000"|TARGET_IMG_LDFLAGS="\$TARGET_IMG_LDFLAGS -Wl,-Ttext,0x9000"|g' configure
   sed -i 's|grub_cv_target_cc_ld_image_base=yes|grub_cv_target_cc_ld_image_base=no|g' configure
