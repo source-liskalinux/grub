@@ -37,20 +37,19 @@ build() {
       i386-pc)
         _platform=pc
         _arch=i386
-        _target_cflags="-m32 -O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+        _target_cflags="-O2 -m32 -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
       i386-efi)
         _platform=efi
         _arch=i386
-        _target_cflags="-m32 -O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+        _target_cflags="-O2 -m32 -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
       x86_64-efi)
         _platform=efi
         _arch=x86_64
-        _target_cflags="-m64 -O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
+        _target_cflags="-O2 -m64 -fno-stack-protector -fno-cf-protection -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
         ;;
     esac
-    export TARGET_CFLAGS="${_target_cflags}"
     ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
@@ -67,7 +66,11 @@ build() {
         --disable-werror \
         --disable-maintainer-mode \
         --with-platform="${_platform}" \
-        --target="${_arch}"
+        --target="${_arch}" \
+        TARGET_CC="gcc" \
+        TARGET_CFLAGS="${_target_cflags}" \
+        TARGET_CPPFLAGS="" \
+        TARGET_LDFLAGS=""
     make
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
