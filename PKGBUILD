@@ -26,7 +26,7 @@ prepare() {
   echo "--> [PREPARE] Fix DejaVu font path directly in configure script...."
   sed -i 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' configure
   local _10_linux="${srcdir}/${pkgname}-${pkgver}"
-  echo "--> [PREPARE] Configuring /util/grub.d/10_linux.in for Liska Linux & initramfs-liska.img...."
+  echo "--> [PREPARE] Configuring /util/grub.d/10_linux.in...."
   sed -i 's|GNU/Linux|Linux|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s...." ${os})"|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${_10_linux}/util/grub.d/10_linux.in"
