@@ -22,35 +22,16 @@ sha256sums=('SKIP' 'SKIP')
 _targets=(i386-pc i386-efi x86_64-efi)
 
 build() {
-  unset CC CXX LD
+  cd "${pkgname}-${pkgver}"
+  unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS TARGET_CFLAGS TARGET_LDFLAGS TARGET_CPPFLAGS CC CXX LD
   for _target in "${_targets[@]}"
   do
-    echo "===> Preparing clean source tree for targeted platform: ${_target}"
-    cd "${srcdir}"
-    rm -rf "${pkgname}-${pkgver}-${_target}"
-    cp -a "${pkgname}-${pkgver}" "${pkgname}-${pkgver}-${_target}"
-    cd "${pkgname}-${pkgver}-${_target}"
-    local _platform _arch
-    case "${_target}" in
-      i386-pc)
-        _platform=pc
-        _arch=i386
-        ;;
-      i386-efi)
-        _platform=efi
-        _arch=i386
-        ;;
-      x86_64-efi)
-        _platform=efi
-        _arch=x86_64
-        ;;
-    esac
-    export CFLAGS="-O2 -pipe -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-    export TARGET_CFLAGS="-O2 -pipe -fno-cf-protection -fno-stack-protector -Wno-error=discarded-qualifiers -Wno-error=maybe-uninitialized -Wno-error=attributes"
-    export CPPFLAGS=""
-    export LDFLAGS=""
-    export TARGET_LDFLAGS=""
-    ./configure \
+    echo "===> Building target platform: ${_target}"
+    local _arch="${_target%%-*}"
+    local _platform="${_target#*-}"
+    mkdir -p "build-${_target}"
+    cd "build-${_target}"
+    ../configure \
         --prefix="/usr" \
         --bindir="/usr/bin" \
         --sbindir="/usr/bin" \
@@ -64,18 +45,22 @@ build() {
         --enable-boot-time \
         --enable-cache-stats \
         --disable-werror \
+        --enable-stack-protector=no \
         --with-platform="${_platform}" \
         --target="${_arch}"
     make
+    cd "${srcdir}/${pkgname}-${pkgver}"
   done
 }
 
 package() {
+  cd "${pkgname}-${pkgver}"
   for _target in "${_targets[@]}"
   do
-    echo "===> Installing targeted platform: ${_target}"
-    cd "${srcdir}/${pkgname}-${pkgver}-${_target}"
+    echo "===> Installing target platform: ${_target}"
+    cd "build-${_target}"
     make DESTDIR="${pkgdir}" install
+    cd "${srcdir}/${pkgname}-${pkgver}"
   done
   install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "===> Configuring /etc/grub.d/10_linux...."
