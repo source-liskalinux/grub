@@ -47,7 +47,8 @@ build() {
         --disable-werror \
         --enable-stack-protector=no \
         --with-platform="${_platform}" \
-        --target="${_arch}"
+        --target="${_arch}" \
+        EXTRA_TARGET_CFLAGS="-fno-cf-protection"
     make
     cd "${srcdir}/${pkgname}-${pkgver}"
   done
