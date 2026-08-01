@@ -35,7 +35,7 @@ prepare() {
   sed -i 's|message="$(gettext_printf "Loading Linux %s ..." ${version})"|message="$(gettext_printf "Loading %s...." ${os})"|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s (recovery mode)" "${os}" "${version}")"|title="$(gettext_printf "%s (recovery mode)" "${os}")"|g' "${_10_linux}/util/grub.d/10_linux.in"
   sed -i 's|title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")"|title="$(gettext_printf "%s" "${os}")"|g' "${_10_linux}/util/grub.d/10_linux.in"
-  echo "-- [PREPARE] Make translations reproducible...."
+  echo "--> [PREPARE] Make translations reproducible...."
   sed -i '1i /^PO-Revision-Date:/ d' po/*.sed
 }
 
