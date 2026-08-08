@@ -112,7 +112,7 @@ package() {
     cd "${srcdir}/grub-${_target}"
     make DESTDIR="${pkgdir}" install
   done
-  install -Dm644 "grub.default" "${pkgdir}/etc/default/grub"
+  install -Dm644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
   echo "--> [PACKAGE] Stripping userland binaries in /usr/bin...."
   find "${pkgdir}/usr/bin" -type f -exec strip --strip-unneeded {} + 2>/devnull || true
   rm -rf "${pkgdir}/usr/share/info"
